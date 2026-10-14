@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Amaranta: IA en la Investigación del Derecho</title>
+    
+    <!-- Load Fonts (Substituting for Authkit preferred fonts) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            /* Authkit Colors */
+            --color-midnight-canvas: #05060f;
+            --color-steel-plate: #2f343e;
+            --color-fog-veil: #9da7ba;
+            --color-moon-mist: #c7d3ea;
+            --color-frost-glow: #d1e4fa;
+            --color-ice-highlight: #d8ecf8;
+            --gradient-ice-highlight: linear-gradient(0deg, #d8ecf8 0%, #98c0ef 100%);
+            --color-pure-white: #ffffff;
+            --color-void-violet: #663af3;
+            
+            --color-glass-edge: rgba(186, 215, 247, 0.12);
+            --color-luminous-fill: rgba(199, 211, 234, 0.06);
+
+            /* Typography Substitutions */
+            --font-untitled-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+            --font-aeonikpro: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+            --font-dotdigital: 'JetBrains Mono', ui-monospace, monospace;
+            
+            /* Radii */
+            --radius-cards: 16px;
+            --radius-buttons: 999px;
+            --radius-badges: 6px;
+            
+            /* Shadows for Glassmorphism */
+            --shadow-glass-card: inset 0 1px 1px rgba(199, 211, 234, 0.12), inset 0 24px 48px rgba(199, 211, 234, 0.05), 0 24px 32px rgba(6, 6, 14, 0.7);
+            --shadow-modal: inset 0 1px 1px rgba(216, 236, 248, 0.2), inset 0 24px 48px rgba(168, 216, 245, 0.06), 0 16px 32px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 6px rgba(186, 207, 247, 0.32), 0 0 12px rgba(238, 186, 247, 0.24);
+        }
+
+        body {
+            background-color: var(--color-midnight-canvas);
+            color: var(--color-frost-glow);
+            font-family: var(--font-untitled-sans);
+            margin: 0;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+            position: relative;
+        }
+
+        /* Ambient Blueprint Grid */
+    <!-- Ambient Blueprint Grid -->
+    body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: linear-gradient(to right, rgba(186,215,247,0.06) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(186,215,247,0.06) 1px, transparent 1px);
+            background-size: 80px 80px;
+            pointer-events: none;
+        z-index: 1;
+        filter: blur(40px);
+    }
+
+    /* Top Bar Logos */
+    .top-bar {
+        position: fixed;
+        top: 32px;
+        left: 32px;
+        right: 32px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        z-index: 100;
+        pointer-events: none;
+    }
+    .top-bar img {
+        height: 48px;
+        border-radius: 6px;
+        pointer-events: auto;
+        background: rgba(255,255,255,0.05);
+        padding: 4px;
+        box-shadow: inset 0 0 0 1px rgba(186,215,247,0.12);
+    }
+    
+    /* Navigation Menu */
+    .nav-menu {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        background: rgba(5,6,15,0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        padding: 6px;
+        border-radius: 999px;
+        box-shadow: inset 0 0 0 1px rgba(186,215,247,0.12), 0 4px 12px rgba(0,0,0,0.5);
+        pointer-events: auto;
+    }
+    
+    .nav-item {
+        color: var(--color-moon-mist);
+        font-family: var(--font-untitled-sans);
+        font-size: 13px;
+        font-weight: 500;
+        padding: 6px 12px;
+        border-radius: 999px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        background: transparent;
+        border: none;
+    }
+    
+    .nav-item:hover {
+        color: var(--color-pure-white);
+        background: rgba(186,214,247,0.06);
+    }
+    
+    .nav-item.active {
+        color: var(--color-pure-white);
+        background: rgba(186,214,247,0.12);
+        box-shadow: inset 0 0 0 1px rgba(186,215,247,0.12);
+    }
+
+    /* Typography Utilities */
+        .text-display {
+            font-family: var(--font-aeonikpro);
+            font-size: clamp(48px, 6vw, 72px);
+            font-weight: 500;
+            line-height: 1.17;
+            background: var(--gradient-ice-highlight);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-align: center;
+        }
+        
+        .text-heading {
+            font-family: var(--font-aeonikpro);
+            font-size: clamp(32px, 4vw, 48px);
+            font-weight: 500;
+            line-height: 1.16;
+            color: var(--color-ice-highlight);
+        }
+
+        .text-eyebrow {
+            font-family: var(--font-dotdigital);
+            font-size: 15px;
+            letter-spacing: 0.1em;
+            color: var(--color-moon-mist);
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+        
+        .text-eyebrow::before, .text-eyebrow::after {
+            content: '';
+            height: 1px;
+            width: 40px;
+            background: linear-gradient(90deg, transparent, rgba(186,215,247,0.3), transparent);
+        }
+
+        .text-body {
+            font-size: 16px;
+            font-weight: 400;
+            line-height: 1.5;
+            color: var(--color-moon-mist);
+        }
+        
+        .text-muted {
+            color: var(--color-fog-veil);
+        }
+
+        /* Component Styles */
+        .glass-card {
+            background-color: rgba(186,214,247,0.03);
+            border-radius: var(--radius-cards);
+            box-shadow: var(--shadow-glass-card);
+            padding: 32px;
+            position: relative;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(to bottom, rgba(216,236,248,0.2), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+
+        .modal-card {
+            background-color: rgba(5,6,15,0.97);
+            border-radius: var(--radius-modals);
+            box-shadow: var(--shadow-modal);
+            padding: 32px;
+            position: relative;
+        }
+
+        .btn-primary {
+            background-color: var(--color-void-violet);
+            color: var(--color-pure-white);
+            border-radius: var(--radius-badges); /* Using 6px for CTA inside auth-like context as per spec */
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+        .btn-primary:hover { opacity: 0.9; }
+
+        .btn-ghost {
+            background-color: rgba(186,214,247,0.06);
+            border: none;
+            box-shadow: inset 0 0 0 1px rgba(186,215,247,0.12);
+            color: var(--color-pure-white);
+            border-radius: var(--radius-buttons);
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .btn-ghost:hover {
+            background-color: rgba(186,214,247,0.12);
+        }
+
+        .badge {
+            background-color: rgba(199,211,234,0.12);
+            color: var(--color-frost-glow);
+            border-radius: var(--radius-badges);
+            padding: 4px 10px;
+            font-size: 12px;
+            font-weight: 500;
+            box-shadow: inset 0 1px 1px rgba(199, 211, 234, 0.12);
+        }
+
+        /* Presentation Mechanics */
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.6s ease-in-out, visibility 0.6s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            box-sizing: border-box;
+            z-index: 10;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 20;
+        }
+
+        .slide-content {
+            max-width: 1000px;
+            width: 100%;
+            position: relative;
+        }
+
+        /* Nav Controls */
+        .controls {
+            position: fixed;
+            bottom: 32px;
+            right: 32px;
+            z-index: 100;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        /* Top Bar Logos */
+        .top-bar {
+            position: fixed;
+            top: 32px;
+            left: 32px;
+            right: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            pointer-events: none;
+        }
+        .top-bar img {
+            height: 48px;
+            border-radius: 6px;
+            pointer-events: auto;
+            background: rgba(255,255,255,0.05); /* Slight backing for dark logos if needed */
+            padding: 4px;
+            box-shadow: inset 0 0 0 1px rgba(186,215,247,0.12);
+        }
+
+        /* Code block styling */
+        pre {
+            background-color: rgba(199,211,234,0.03);
+            box-shadow: inset 0 0 0 1px rgba(186,215,247,0.12);
+            border-radius: var(--radius-badges);
+            padding: 20px;
+            font-size: 14px;
+            overflow-x: auto;
+            color: var(--color-moon-mist);
+            white-space: pre-wrap;
+            font-family: var(--font-dotdigital);
+        }
+        
+        .prompt-container {
+            position: relative;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+        }
+
+        /* Custom Scrollbar for Pre */
+        pre::-webkit-scrollbar { height: 6px; }
+        pre::-webkit-scrollbar-track { background: transparent; }
+        pre::-webkit-scrollbar-thumb { background: rgba(186,215,247,0.2); border-radius: 4px; }
+
+        .icon-tile {
+            width: 64px;
+            height: 64px;
+            border-radius: 9999px;
+            background: rgba(186,214,247,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: inset 0 0 0 1px rgba(186,215,247,0.12);
+            color: var(--color-frost-glow);
+        }
+        
+        /* Grid styling inside slides */
+        .glass-grid {
+            display: grid;
+            gap: 24px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar Logos and Menu -->
+    <div class="top-bar">
+        <img src="Imagen Next Leap_3.jpg" alt="Next Leap Logo" onerror="this.src='https://placehold.co/120x40/05060f/d1e4fa?text=Next+Leap'">
+        
+        <nav class="nav-menu" id="main-nav">
+            <button class="nav-item active" onclick="goToSlide(0)">Inicio</button>
+            <button class="nav-item" onclick="goToSlide(1)">Diagnóstico</button>
+            <button class="nav-item" onclick="goToSlide(2)">Descubrir</button>
+            <button class="nav-item" onclick="goToSlide(3)">RAG & Prompting</button>
+            <button class="nav-item" onclick="goToSlide(4)">Automatización</button>
+            <button class="nav-item" onclick="goToSlide(5)">Amaranta Space</button>
+            <button class="nav-item" onclick="goToSlide(6)">Ética</button>
+            <button class="nav-item" onclick="goToSlide(7)">Comunidad</button>
+        </nav>
+
+        <img src="logo departamento_3.jpeg" alt="Departamento Propiedad Intelectual UExternado" onerror="this.src='https://placehold.co/200x40/05060f/ffffff?text=U.Externado+PI'">
+    </div>
+
+    <div class="spotlight"></div>
+
+    <div class="controls">
+        <button class="btn-ghost" style="padding: 8px; border-radius: 999px;" onclick="prevSlide()" aria-label="Anterior diapositiva">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <span id="slide-counter" style="color: var(--color-fog-veil); font-size: 14px; font-weight: 500; font-family: var(--font-dotdigital); min-width: 40px; text-align: center;">1/8</span>
+        <button class="btn-ghost" style="padding: 8px; border-radius: 999px;" onclick="nextSlide()" aria-label="Siguiente diapositiva">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+        </button>
+    </div>
+
+    <!-- SLIDE 1: Título y Frase -->
+    <div class="slide active" id="slide-1">
+        <div class="slide-content text-center flex flex-col items-center">
+            <div class="text-eyebrow mb-6">VI Semana del Derecho 2026</div>
+            <h1 class="text-display mb-12">Amaranta</h1>
+            
+            <div class="glass-card max-w-3xl text-center">
+                <p class="text-body italic text-[18px] text-white">
+                    "Siendo una mujer sin prejuicios, alegre y moderna, con los pies bien asentados en el mundo, abrió puertas y ventanas para espantar la ruina."
+                </p>
+            </div>
+            <p class="mt-8 text-sm font-medium text-muted">Límites éticos y oportunidades del uso de la IA en la investigación del Derecho</p>
+        </div>
+    </div>
+
+    <!-- SLIDE 2: El Diagnóstico -->
+    <div class="slide" id="slide-2">
+        <div class="slide-content">
+            <div class="text-eyebrow mb-4">El Diagnóstico</div>
+            <h2 class="text-heading text-center mb-12">¿Qué es Amaranta?</h2>
+            
+            <div class="glass-grid grid-cols-1 md:grid-cols-2">
+                <div class="glass-card">
+                    <h3 class="font-aeonikpro text-2xl text-ice-highlight mb-6">El Contexto Actual</h3>
+                    <ul class="space-y-4 text-moon-mist">
+                        <li class="flex items-start">
+                            <span class="mr-3 mt-1 text-blueprint-blue">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            </span>
+                            <span>¿Está el Derecho en ruinas?</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="mr-3 mt-1 text-blueprint-blue">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            </span>
+                            <span>Estamos frente a una decadencia en las metodologías tradicionales.</span>
+                        </li>
+                    </ul>
+                </div>
+                <div class="modal-card">
+                    <h3 class="font-aeonikpro text-2xl text-white mb-6 flex items-center gap-3">
+                        La Solución 
+                        <span class="badge">IA Generativa</span>
+                    </h3>
+                    <p class="text-lg text-white mb-4">¿Puede la tecnología espantar la ruina?</p>
+                    <p class="text-moon-mist leading-relaxed">
+                        Hoy, con la Inteligencia Artificial, podemos <strong class="text-frost-glow">reinventar el derecho</strong> y transformar radicalmente la forma en que investigamos y construimos conocimiento.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 3: Crear un Flujo - Descubrir -->
+    <div class="slide" id="slide-3">
+        <div class="slide-content">
+            <div class="text-eyebrow mb-4">1. Descubrir</div>
+            <h2 class="text-heading text-center mb-12">Crear un Flujo</h2>
+            
+            <div class="glass-grid grid-cols-1 md:grid-cols-2">
+                <!-- Consensus Card -->
+                <div class="glass-card flex flex-col items-start group hover:bg-[rgba(186,214,247,0.05)] transition-colors">
+                    <div class="icon-tile mb-6">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </div>
+                    <h3 class="font-aeonikpro text-2xl text-ice-highlight mb-3">Consensus</h3>
+                    <p class="mb-8 text-moon-mist text-sm leading-relaxed">Motor de búsqueda impulsado por IA que extrae respuestas directamente de la investigación científica.</p>
+                    <a href="https://consensus.app/" target="_blank" class="btn-ghost mt-auto">
+                        Explorar Consensus
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                </div>
+
+                <!-- SciSpace Card -->
+                <div class="glass-card flex flex-col items-start group hover:bg-[rgba(186,214,247,0.05)] transition-colors">
+                    <div class="icon-tile mb-6">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                    </div>
+                    <h3 class="font-aeonikpro text-2xl text-ice-highlight mb-3">SciSpace</h3>
+                    <p class="mb-8 text-moon-mist text-sm leading-relaxed">Tu copiloto para comprender artículos. Lee, interactúa y extrae datos de PDFs complejos.</p>
+                    <a href="https://scispace.com/" target="_blank" class="btn-ghost mt-auto">
+                        Abrir SciSpace
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 4: Crear un Flujo - Revisión y Prompting -->
+    <div class="slide" id="slide-4">
+        <div class="slide-content">
+            <div class="text-eyebrow mb-4">2. Revisión y Reglas</div>
+            <h2 class="text-heading text-center mb-8">El Arte del Prompting</h2>
+            
+            <div class="flex flex-col justify-center items-center gap-2 mb-8">
+                <div class="flex items-center gap-4">
+                    <span class="badge" title="Retrieval-Augmented Generation">Crear un RAG</span>
+                    <a href="https://notebook.google.com/" target="_blank" class="text-frost-glow hover:text-white text-sm flex items-center gap-2" style="text-decoration: none;">
+                        Ej. NotebookLM <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
+                    </a>
+                </div>
+                <p class="text-xs text-muted max-w-md text-center">
+                    *<strong>RAG (Retrieval-Augmented Generation):</strong> Técnica que mejora las respuestas de la IA conectándola a tus propios documentos (tu base de conocimiento) antes de generar el texto, asegurando precisión jurídica.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Reglas del Prompt -->
+                <div class="col-span-1 space-y-4">
+                    <div class="glass-card !p-5">
+                        <h4 class="text-ice-highlight font-medium mb-1">Rol</h4>
+                        <p class="text-xs text-muted">El tipo de investigador con su criterio profesional.</p>
+                    </div>
+                    <div class="glass-card !p-5">
+                        <h4 class="text-ice-highlight font-medium mb-1">Contexto</h4>
+                        <p class="text-xs text-muted">Situación real, datos concretos, audiencia, restricciones.</p>
+                    </div>
+                    <div class="glass-card !p-5">
+                        <h4 class="text-ice-highlight font-medium mb-1">Instrucción</h4>
+                        <p class="text-xs text-muted">Entregable, formato, extensión. <br><strong class="text-frost-glow">Sin normas de etiqueta. No humanizar la IA.</strong></p>
+                    </div>
+                </div>
+
+                <!-- Ejemplo de Prompt -->
+                <div class="col-span-2 modal-card prompt-container">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-white text-sm font-dotdigital tracking-widest uppercase">Ejemplo Práctico</h3>
+                        <button class="btn-ghost !text-xs !py-1 !px-3 copy-btn" onclick="copyPrompt()" id="copyBtnText">Copiar Prompt</button>
+                    </div>
+                    <pre id="promptText" class="text-sm leading-relaxed text-moon-mist">
+<span class="text-white">Rol:</span> Eres un experto en Propiedad Intelectual y en estudiar cómo se ha justificado. Tengo amplia experiencia en discusiones que evalúan los fundamentos filosóficos de la PI. Tienes un PhD en derecho y propiedad intelectual.
+
+<span class="text-white">Contexto:</span> Preparo contenidos (VideoBlog, Blog, artículo) sobre cómo la IA replantea la PI desde la Singularidad en 3 temas: 
+1. IA como autor/inventor.
+2. Infracciones por IA y contenido protegido.
+3. Si hay Singularidad (desarrollo autónomo), no hay necesidad de incentivos de PI.
+
+<span class="text-white">Instrucción:</span> Hacer un cuadro comparativo de artículos sobre IA y Singularidad, y su impacto en la PI.</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 5: Consagración a los estudios -->
+    <div class="slide" id="slide-5">
+        <div class="slide-content">
+            <div class="text-eyebrow mb-4">Automatización</div>
+            <h2 class="text-heading text-center mb-12">"Una consagración a los estudios"</h2>
+
+            <div class="glass-grid grid-cols-1 md:grid-cols-2">
+                <div class="glass-card relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blueprint-blue to-transparent"></div>
+                    <h3 class="font-aeonikpro text-2xl text-ice-highlight mb-4">Agentes IA</h3>
+                    <p class="text-moon-mist text-sm mb-6">Revisiones periódicas de fuentes automatizadas.</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="badge">Copilot Pro</span>
+                        <span class="badge">Skills (Claude)</span>
+                        <span class="badge">Gems (Gemini)</span>
+                    </div>
+                </div>
+
+                <div class="glass-card relative overflow-hidden">
+                     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-void-violet to-transparent"></div>
+                    <h3 class="font-aeonikpro text-2xl text-ice-highlight mb-4">Datos Sintéticos</h3>
+                    <p class="text-moon-mist text-sm mb-4">Investigación cuantitativa simulando escenarios.</p>
+                    <ul class="text-xs space-y-2 text-muted">
+                        <li>• RCI para crear miles de perfiles.</li>
+                        <li>• Simulación de respuestas.</li>
+                        <li>• Expertos virtuales en la materia.</li>
+                    </ul>
+                </div>
+                
+                <div class="md:col-span-2 glass-card text-center !p-6 flex items-center justify-center">
+                     <p class="text-frost-glow text-lg">Integración para la generación de Presentaciones y Reportes</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 6: Amaranta Next Leap -->
+    <div class="slide" id="slide-6">
+        <div class="slide-content text-center flex flex-col items-center">
+            <div class="text-eyebrow mb-4">El Futuro</div>
+            <h2 class="text-heading mb-8">Amaranta Next Leap</h2>
+            
+            <div class="glass-card max-w-2xl mx-auto mb-10">
+                <h3 class="font-aeonikpro text-2xl text-ice-highlight mb-4 italic">"El derecho como siempre debió ser"</h3>
+                <p class="text-moon-mist text-base leading-relaxed">
+                    La IA no busca destruir la profesión, sino elevarla. Nos permite enfocarnos en el análisis crítico, la estrategia y la empatía, delegando el procesamiento masivo de información.
+                </p>
+            </div>
+
+            <a href="https://www.amaranta.space/" target="_blank" class="btn-primary" style="text-decoration: none;">
+                Visitar Amaranta Space
+            </a>
+        </div>
+    </div>
+
+    <!-- SLIDE 7: Ética -->
+    <div class="slide" id="slide-7">
+        <div class="slide-content">
+            <div class="text-eyebrow mb-4">Consideraciones</div>
+            <h2 class="text-heading text-center mb-12">Aspectos Éticos</h2>
+            
+            <div class="modal-card max-w-3xl mx-auto border-l-[3px] border-l-void-violet">
+                <p class="text-lg italic mb-8 text-blueprint-blue">"Amaranta Úrsula descuidó la defensa"</p>
+                
+                <ul class="space-y-8 text-base">
+                    <li class="flex flex-col gap-2">
+                        <span class="text-white font-medium text-lg flex items-center gap-2">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-void-violet)" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                            ¿Con IA o Por IA?
+                        </span>
+                        <span class="text-moon-mist leading-relaxed pl-7">La delgada línea entre utilizar la IA como una asistencia técnica que potencia nuestras capacidades y delegar por completo el juicio profesional, perdiendo la responsabilidad sobre el resultado final.</span>
+                    </li>
+                    <li class="flex flex-col gap-2">
+                        <span class="text-white font-medium text-lg flex items-center gap-2">
+                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-void-violet)" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            Dominio Intelectual
+                        </span>
+                        <span class="text-moon-mist leading-relaxed pl-7">El riesgo inminente de atrofia en nuestras habilidades fundamentales de investigación, redacción y análisis crítico si caemos en una dependencia ciega y no verificada de los sistemas automatizados.</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- SLIDE 8: Gracias y Enlaces -->
+    <div class="slide" id="slide-8">
+        <div class="slide-content text-center">
+            <h1 class="text-display mb-4" style="font-size: clamp(40px, 5vw, 60px);">Gracias</h1>
+            <p class="text-lg mb-12 text-moon-mist">carlos.conde@uexternado.edu.co</p>
+
+            <div class="glass-grid grid-cols-1 md:grid-cols-3 max-w-4xl mx-auto">
+                <!-- Enlace 1 -->
+                <div class="glass-card flex flex-col items-center text-center !p-6 hover:-translate-y-1 transition-transform">
+                    <h4 class="text-ice-highlight font-medium mb-1">Comunidad</h4>
+                    <p class="text-xs text-muted mb-4">Únete a la discusión</p>
+                    <div class="w-28 h-28 bg-white rounded-xl mb-4 p-1 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                         <img src="https://api.qrserver.com/v1/create-qr-code/?size=112x112&data=https://www.instagram.com/nextleapspace/&color=05060f" alt="QR Instagram" class="w-full h-full rounded-lg">
+                    </div>
+                    <a href="https://www.instagram.com/nextleapspace/" target="_blank" class="btn-ghost !text-xs !py-1">@nextleapspace</a>
+                </div>
+
+                <!-- Enlace 2 -->
+                <div class="glass-card flex flex-col items-center text-center !p-6 hover:-translate-y-1 transition-transform">
+                    <h4 class="text-ice-highlight font-medium mb-1">Next Leap</h4>
+                    <p class="text-xs text-muted mb-4">Conoce nuestro proyecto</p>
+                    <div class="w-28 h-28 bg-white rounded-xl mb-4 p-1 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=112x112&data=https://nxlp.space/&color=05060f" alt="QR NXLP" class="w-full h-full rounded-lg">
+                    </div>
+                    <a href="https://nxlp.space/" target="_blank" class="btn-ghost !text-xs !py-1">nxlp.space</a>
+                </div>
+
+                <!-- Enlace 3 -->
+                <div class="glass-card flex flex-col items-center text-center !p-6 hover:-translate-y-1 transition-transform">
+                    <h4 class="text-ice-highlight font-medium mb-1">Curso IA</h4>
+                    <p class="text-xs text-muted mb-4">U. Externado</p>
+                    <div class="w-28 h-28 bg-white rounded-xl mb-4 p-1 shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=112x112&data=https://www.uexternado.edu.co/programa/departamento-de-la-propiedad-intelectual/curso-de-inmersion-inteligencia-artificial-para-abogados-e-investigadores-en-derecho/&color=05060f" alt="QR Curso" class="w-full h-full rounded-lg">
+                    </div>
+                    <a href="https://www.uexternado.edu.co/programa/departamento-de-la-propiedad-intelectual/curso-de-inmersion-inteligencia-artificial-para-abogados-e-investigadores-en-derecho/" target="_blank" class="btn-ghost !text-xs !py-1">Ver Programa</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const counter = document.getElementById('slide-counter');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        // Initialize
+        function updateSlides() {
+            slides.forEach((slide, index) => {
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            counter.innerText = `${currentSlide + 1}/${slides.length}`;
+            updateNav();
+        }
+        
+        function updateNav() {
+            navItems.forEach((item, index) => {
+                if (index === currentSlide) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+        
+        function goToSlide(index) {
+            if (index >= 0 && index < slides.length) {
+                currentSlide = index;
+                updateSlides();
+            }
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlides();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlides();
+            }
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'Space' || e.key === 'Enter') {
+                nextSlide();
+            } else if (e.key === 'ArrowLeft') {
+                prevSlide();
+            }
+        });
+
+        // Copy to clipboard function
+        function copyPrompt() {
+            const promptEl = document.getElementById('promptText');
+            // Extract text content, stripping HTML tags
+            const textToCopy = promptEl.innerText;
+            
+            // Fallback copy method
+            const textArea = document.createElement("textarea");
+            textArea.value = textToCopy;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-999999px";
+            textArea.style.top = "-999999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+
+            try {
+                document.execCommand('copy');
+                const btn = document.getElementById('copyBtnText');
+                const originalText = btn.innerText;
+                btn.innerText = "¡Copiado!";
+                btn.style.color = "var(--color-pure-white)";
+                btn.style.backgroundColor = "var(--color-void-violet)";
+                btn.style.boxShadow = "none";
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.style.color = "";
+                    btn.style.backgroundColor = "";
+                    btn.style.boxShadow = "";
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy', err);
+            }
+            
+            textArea.remove();
+        }
+
+        // Initialize counter
+        updateSlides();
+    </script>
+</body>
+</html>
